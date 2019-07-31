@@ -48,8 +48,17 @@ for l in range(0,len(y)):
 #TODO: 14 is spoken languages. must be split up and categorised
 
 
-
-
+# TODO: Encoding categorical data
+    """
+from sklearn.preprocessing import LabelEncoder, OneHotEncoder
+labelencoder_X_1 = LabelEncoder()
+X[:, 1] = labelencoder_X_1.fit_transform(X[:, 1])
+labelencoder_X_2 = LabelEncoder()
+X[:, 2] = labelencoder_X_2.fit_transform(X[:, 2])
+onehotencoder = OneHotEncoder(categorical_features = [1])
+X = onehotencoder.fit_transform(X).toarray()
+X = X[:, 1:]
+"""
 
 # TODO: Splitting the dataset into the Training set and Test set
 """from sklearn.cross_validation import train_test_split
