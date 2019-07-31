@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Tue Jul 30 06:46:53 2019
-
-@author: User
+@author: rian-van-den-ander
 """
 
 # Random Forest Regression
@@ -20,10 +19,26 @@ y = dataset.iloc[:, 12].values #revenue
 #setting y to profit of film
 y = y - X[:,0]
 
-#TODO: Is profit adjusted for US inflation?
-
 #picking independent variables
 X = X[:,[0,1,9,11,13,14]]
+
+# Removing zero revenues from the data
+y_removed = []
+X_removed = []
+for l in range(0,len(y)):
+    if y[l] !=0:
+        y_removed.append(y[l])
+        X_removed.append(X[l])
+y = np.array(y_removed)
+X = np.array(X_removed)
+
+# Ajusting inflation to 2019 at average inflation - 3.22%
+avg_inflation = 1.01322
+year_now = 2019
+for l in range(0,len(y)):
+    film_year = int(X[l,3][0:4])
+    y[l] = y[l]*(avg_inflation ** (year_now-film_year))
+
 
 #some independent variables need work
 
