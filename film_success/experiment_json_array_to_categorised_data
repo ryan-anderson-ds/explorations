@@ -1,0 +1,60 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Jul 31 09:09:17 2019
+@author: rian-van-den-ander
+"""
+
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+import json
+
+# Importing the dataset
+dataset = pd.read_csv('tmdb_5000_movies.csv')
+X = dataset.iloc[:, 0:20].values
+
+#just working with one column
+X = X[:,1]
+
+
+#to convert just one row to json
+for test in json.loads(X[1]):
+    print (test)
+
+#TODO: pick just the id from that. the genre name is pointless
+    
+
+#TODO: and add it back to original matrix, but increase matrix size if necessary
+    #this feels like a problem. i think i just need to create a column called '28'
+    #if 28 is the id
+    #and then set it to 0 or 1. 
+    #but avoid encoding trap at the end
+    #so basically im manually encoding, but thats ok 
+    
+    
+#TODO: Now apply this to all the rows
+    
+    
+#TODO and then within the bigger X, not just X starting with 1 column
+    
+    
+#TODO and then for multiple json types. Maybe make this a library!
+
+
+
+"""
+
+x2 = []
+
+#adding in the new dimension
+for row in X:
+    x2.append([np.array(jsondata) for jsondata in row])
+#transforming back into numpy array
+x2 = np.array(x2)
+
+#AN EASIER WAY TO DO IT MIGHT JUST BE TO GET THE LIST OF POSSIBLE GENRES AND
+#LOOP THROUGH TO SEE IF THIS HAS THAT ONE
+#BUT THIS IS NOT SUPER EXTENSABLE 
+
+"""
