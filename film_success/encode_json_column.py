@@ -15,7 +15,7 @@ def is_json(myjson):
         return False
     return True
 
-def categorise_json_column(pandas_data_frame, json_column_index=0, json_column_categorical_name="id"):
+def encode_json_column(pandas_data_frame, json_column_index=0, json_id_column="id"):
         
     X = pandas_data_frame.iloc[:, :].values
             
@@ -31,8 +31,8 @@ def categorise_json_column(pandas_data_frame, json_column_index=0, json_column_c
             #for each feature in the json
             for json_features in json.loads(row[json_column_index]):
                 
-                #pick out its id (the json identifier you specifc in json_column_categorical_name)
-                featureid = json_features[json_column_categorical_name]
+                #pick out its id (the json identifier you specifc in json_id_column)
+                featureid = json_features[json_id_column]
                 
                 #if this id hasn't been seen yet, add it to the dataframe with default 0
                 if featureid not in encodedcolumns:
