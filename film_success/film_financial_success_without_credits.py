@@ -43,6 +43,15 @@ for l in range(0,len(y)):
 #some independent variables need work
 
 #TODO: 1 is genre list. must be split up and categorised
+    
+    """ eg
+    
+    dataset = pd.read_csv('tmdb_5000_movies.csv')
+json_column_index=1
+json_column_categorical_name="id"
+    
+    """
+    
 #TODO: 9 is production companies. must be split up and categorised
 #TODO: 11 is release date. how do i include this? maybe a day of year
 #TODO: 14 is spoken languages. must be split up and categorised
