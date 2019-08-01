@@ -45,6 +45,6 @@ def encode_json_column(pandas_data_frame, json_column_index=0, json_id_column="i
         count+=1
 
     #drop the original json column
-    pandas_data_frame = pandas_data_frame.drop(dataset.columns[json_column_index], 1)
+    pandas_data_frame = pandas_data_frame.drop(pandas_data_frame.columns[json_column_index], 1)
     
     return pandas_data_frame
