@@ -15,8 +15,6 @@ def is_json(myjson):
         return False
     return True
 
-
-
 def categorise_json_column(pandas_data_frame, json_column_index=0, json_column_categorical_name="id"):
     
     #input variables

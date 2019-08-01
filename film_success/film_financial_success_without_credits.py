@@ -46,6 +46,7 @@ for l in range(0,len(y)):
 #TODO: 9 is production companies. must be split up and categorised
 #TODO: 11 is release date. how do i include this? maybe a day of year
 #TODO: 14 is spoken languages. must be split up and categorised
+    #NB: This does not have ID, must categorise on another
 
 
 # TODO: Encoding categorical data
