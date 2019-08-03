@@ -4,23 +4,29 @@ Created on Tue Jul 30 06:46:53 2019
 @author: rian-van-den-ander
 """
 
-# Random Forest Regression
+# ---- IMPORTS AND INPUTS -----
 
-# Importing the libraries
 import numpy as np
-import matplotlib.pyplot as plt
 import pandas as pd
+from encode_json_column import encode_json_column
+from datetime import datetime
 
 # Importing the dataset
 dataset = pd.read_csv('tmdb_5000_movies.csv')
+# Easiest to get right to dropping NaN, because there are several rows of bad data which can't 
+# be used by the algorithm. Since I'm working with around 5000 rows to start, dropping around 50 NaNs is not a problem.
+
+# ---- DATA PREPARATION -----
+
 X = dataset.iloc[:, 0:20].values
 y = dataset.iloc[:, 12].values #revenue
 
-#setting y to profit of film
+# setting y to profit of film
 y = y - X[:,0]
 
-#picking independent variables
-X = X[:,[0,1,9,11,13,14]]
+# picking independent variables
+X = X[:,[0,1,11,13,14]]
+# TODO: ADD BACK PRODUCTION COMPANIES (9), KEYWORDS AND ACTORS. BUT LIMIT ENCODING TO 20 EACH
 
 # Removing zero revenues from the data
 y_removed = []
@@ -36,45 +42,69 @@ X = np.array(X_removed)
 avg_inflation = 1.01322
 year_now = 2019
 for l in range(0,len(y)):
-    film_year = int(X[l,3][0:4])
+    film_year = int(X[l,2][0:4]) # TODO: THIS WILL CHANGE IF I ADD BACK PRODUCTION COMPANIES, KEYWORDS AND THEY'RE BEFORE 11
     y[l] = y[l]*(avg_inflation ** (year_now-film_year))
 
+# converting film date to day of year. i've already adjusted for year through inflation
+# i am arguably losing the 'year' which might be slightly correlated with film success
+for l in range(0,len(y)):
+    film_date = X[l,2]  # TODO: THIS WILL CHANGE IF I ADD BACK PRODUCTION COMPANIES, KEYWORDS AND THEY'RE BEFORE 11
+    try:
+        datetime_object = datetime.strptime(film_date, '%Y-%m-%d')
+        X[l,2] = datetime_object.timetuple().tm_yday
+    except:
+        X[l,2] = 0
 
-#some independent variables need work
+# after some basic processing, encoding the 
+dataset =  pd.DataFrame(X)
 
-#TODO: 1 is genre list. must be split up and categorised
-    
-    """ eg
-    
-    dataset = pd.read_csv('tmdb_5000_movies.csv')
-json_column_index=1
-json_column_categorical_name="id"
-    
-    """
-    
-#TODO: 9 is production companies. must be split up and categorised
-#TODO: 11 is release date. how do i include this? maybe a day of year
-#TODO: 14 is spoken languages. must be split up and categorised
-    #NB: This does not have ID, must categorise on another
+# encoding genres
+dataset = encode_json_column(dataset, 1,"id")
 
+# encoding spoken languages - this has now become column 3
+ # TODO: THIS WILL CHANGE IF I ADD BACK PRODUCTION COMPANIES, KEYWORDS AND THEY'RE BEFORE 11
+ # TODO: MUST THEN TEST AGAIN
+dataset = encode_json_column(dataset, 3,"iso_639_1")
 
-# TODO: Encoding categorical data
-    """
-from sklearn.preprocessing import LabelEncoder, OneHotEncoder
-labelencoder_X_1 = LabelEncoder()
-X[:, 1] = labelencoder_X_1.fit_transform(X[:, 1])
-labelencoder_X_2 = LabelEncoder()
-X[:, 2] = labelencoder_X_2.fit_transform(X[:, 2])
-onehotencoder = OneHotEncoder(categorical_features = [1])
-X = onehotencoder.fit_transform(X).toarray()
-X = X[:, 1:]
-"""
+# this results in 108 independent variables from 6, in a dataset of size 20. it's a lot.
+# Saving to CSVs as the above takes quite a while, and I'd like to use this as a checkpoint:
+dataset.to_csv(r'Encoded_X.csv')
+dataset_y = pd.DataFrame(y)
+dataset_y.to_csv(r'Encoded_y.csv')
 
-# TODO: Splitting the dataset into the Training set and Test set
-"""from sklearn.cross_validation import train_test_split
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state = 0)"""
+# --- CHECKPOINT ----
+# reloading back from CSVs, since previous step can take a long time
 
-# TODO: Feature scaling? 
+dataset_X_reimported = pd.read_csv('Encoded_X.csv') #this fucks out a bit. index is included, so i need to skip that
+dataset_y_reimported = pd.read_csv('Encoded_y.csv') #this fucks out a bit. index is included, so i need to skip that
+dataset_reimported = pd.concat([dataset_X_reimported,dataset_y_reimported],axis=1)
+dataset_reimported = dataset_reimported.replace([np.inf, -np.inf], np.nan)
+dataset_reimported = dataset_reimported.dropna() #just two rows are lost by dropping NaN values. Better than using mean here
+
+X = dataset_reimported.iloc[:, 1:].values
+y = dataset_y_reimported.iloc[:, -1].values
+
+# Splitting the dataset into the Training set and Test set
+# I have a fairly large dataset of +- 4000 entries, so I'm going with 10% test data
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.1, random_state = 0)
+
+from sklearn.preprocessing import StandardScaler
+sc_X = StandardScaler()
+X_train = sc_X.fit_transform(X_train)
+X_test = sc_X.transform(X_test)
+sc_y = StandardScaler()
+y_train = sc_y.fit_transform(y_train)
+
+np.isnan(X_train).any()
+
+from sklearn.svm import SVR
+svr_regressor = SVR(kernel='linear')
+svr_regressor.fit(X_train, y_train)
+
+y_pred = svr_regressor.predict(X_test)
+
+# Feature scaling
 """from sklearn.preprocessing import StandardScaler
 sc_X = StandardScaler()
 X_train = sc_X.fit_transform(X_train)
@@ -82,20 +112,3 @@ X_test = sc_X.transform(X_test)
 sc_y = StandardScaler()
 y_train = sc_y.fit_transform(y_train)"""
 
-# Fitting Random Forest Regression to the dataset
-from sklearn.ensemble import RandomForestRegressor
-regressor = RandomForestRegressor(n_estimators = 10, random_state = 0)
-regressor.fit(X, y)
-
-# Predicting a new result
-y_pred = regressor.predict(6.5)
-
-# Visualising the Random Forest Regression results (higher resolution)
-X_grid = np.arange(min(X), max(X), 0.01)
-X_grid = X_grid.reshape((len(X_grid), 1))
-plt.scatter(X, y, color = 'red')
-plt.plot(X_grid, regressor.predict(X_grid), color = 'blue')
-plt.title('Truth or Bluff (Random Forest Regression)')
-plt.xlabel('Position level')
-plt.ylabel('Salary')
-plt.show()
