@@ -75,9 +75,8 @@ def encode_json_column(pandas_data_frame, json_column_index=0, json_id_column="i
                     if featureid not in df_encodedcolumns:
                         df_encodedcolumns.append(featureid)
                         pandas_data_frame[featureid]=0
-                   
-                    #else just set it to 1 here
-                    pandas_data_frame[featureid][count] = 1
+
+                    pandas_data_frame.loc[count,featureid] = 1
                     
                     has_an_encoded_value = 1
     
