@@ -4,15 +4,10 @@ Created on Tue Jul 30 06:46:53 2019
 @author: rian-van-den-ander
 """
 
-# ---- IMPORTS AND INPUTS -----
-
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 
-# --- CHECKPOINT ----
-# reloading back from CSVs, since previous step can take a long time
-
+#Loading data from preprocessed CSVs
 dataset_X_reimported = pd.read_csv('Encoded_X.csv')
 dataset_y_reimported = pd.read_csv('Encoded_y - revenue.csv')
 dataset_reimported = pd.concat([dataset_X_reimported,dataset_y_reimported],axis=1)
@@ -23,7 +18,7 @@ X = dataset_reimported.iloc[:, 1:-2].values
 y = dataset_reimported.iloc[:, -1].values
 
 # Removing zero revenues from the data
-# this removes an astounding 1300 items
+# I did this now in data prep because I realised it later, and data prep takes a good 30 minutes. 
 y_removed = []
 X_removed = []
 for l in range(0,len(y)):
@@ -38,6 +33,7 @@ y = np.array(y_removed)
 from sklearn.model_selection import train_test_split
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.1)
 
+#This regressor was picked with gridsearch over many parameters - took 4 hours
 from xgboost import XGBRegressor
 regressor = XGBRegressor(colsample_bytree= 0.6, gamma= 0.7, max_depth= 4, min_child_weight= 5,
                          subsample = 0.8, objective='reg:squarederror')

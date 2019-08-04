@@ -16,21 +16,17 @@ dataset = pd.read_csv('tmdb_5000_movies.csv')
 dataset_credits = pd.read_csv('tmdb_5000_credits.csv')
 dataset = pd.concat([dataset, dataset_credits], axis=1)
 
-# Easiest to get right to dropping NaN, because there are several rows of bad data which can't 
-# be used by the algorithm. Since I'm working with around 5000 rows to start, dropping around 50 NaNs is not a problem.
-
-# meaning out 0 budgets
+# meaning out 0 budgets - there are a lot, so this is better than removing the rows
 dataset['budget']=dataset['budget'].replace(0,dataset['budget'].mean())
 
-# ---- DATA PREPARATION -----
-
 X = dataset.iloc[:, :].values
-y = dataset.iloc[:, 18].values #12 is revenue, 18 is rating
+y = dataset.iloc[:, 18].values  #12 is revenue, 18 is rating - I changed this to make different y source files for next step 
 
 # picking independent variables
 X = X[:,[0,1,4,9,11,13,14,22]]
 
-# Removing zero revenues from the data
+# Removing zero REVENUES from the data - revenue is super important
+# I could (and have) adjusted for inflation, but it made scant difference to model performance
 y_removed = []
 X_removed = []
 for l in range(0,len(y)):
@@ -40,8 +36,9 @@ for l in range(0,len(y)):
 y = np.array(y_removed)
 X = np.array(X_removed)
 
-# converting film date to day of year. i've already adjusted for year through inflation
+# converting film date to day of year
 # i am arguably losing the 'year' which might be slightly correlated with film success
+# but that opens up a whole new can of worms about ratings and revenues by year
 for l in range(0,len(y)):
     film_date = X[l,4]
     try:
@@ -50,33 +47,29 @@ for l in range(0,len(y)):
     except:
         X[l,4] = 0
 
-# after some basic processing, encoding the 
 dataset =  pd.DataFrame(X)
 
-# encoding genres. im not using ID because there'd be an overlap with other ids
-# All genres
+# encoding genres. 
+# using name because "id" overlaps with "id" in the next encoding, and so on
 dataset = encode_json_column(dataset, 1,"name")
 
 # encoding keywords
 # limiting to 100 codes, and removing anything not within those 100
-# yes, it is column 1 now, since last column 1 was removed by the encoder
+# yes, it is column 1 now, since last column 1 was removed by previous encoding
 dataset = encode_json_column(dataset, 1, "name", 100, 1)
 
 # encoding production companies.
-# limiting to 100 codes, and removing anything not within those 50
-
+# limiting to 100 codes, and removing anything not within those 100
 dataset = encode_json_column(dataset, 1,"name", 100, 1)
 
-# encoding spoken languages - this has now become column 3
 # encoding all spoken languages
 dataset = encode_json_column(dataset, 3,"iso_639_1")
 
-
-# encoding cast - this has now become column 3
+# encoding cast
 # encoding 'just' top 500 cast
 dataset = encode_json_column(dataset, 3,"name", 500, 1)
 
-#saving to CSVs as a checkpoint
+#saving to CSVs as a checkpoint to be used in regressors
 dataset.to_csv(r'Encoded_X.csv')
 dataset_y = pd.DataFrame(y)
 dataset_y.to_csv(r'Encoded_y.csv')
