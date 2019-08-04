@@ -50,7 +50,7 @@ def encode_json_column(pandas_data_frame, json_column_index=0, json_id_column="i
         top_encodedcolumns = top_encodedcolumns[:encodinglimit]        
 
     top_encodedcolumns = dict(top_encodedcolumns)
-
+    
     #keep track of whether a column has been encoded into the dataframe already, else we'd reset all the values to 0
     df_encodedcolumns = []
     count = 0
