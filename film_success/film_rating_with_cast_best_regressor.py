@@ -6,6 +6,8 @@ Created on Tue Jul 30 06:46:53 2019
 
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
+
 
 #Loading data from preprocessed CSVs
 dataset_X_reimported = pd.read_csv('Encoded_X.csv')
@@ -31,3 +33,13 @@ regressor.fit(X, y)
 y_pred = regressor.predict(X_test)
 from sklearn.metrics import r2_score
 score = r2_score(y_test, y_pred) 
+
+fig, ax = plt.subplots()
+ax.scatter(y_test, y_pred)
+ax.plot([y.min(), y.max()], [y.min(), y.max()], 'k--', lw=4)
+ax.set_xlabel('Measured rating')
+ax.set_ylabel('Predicted rating')
+plt.title('Measured versus predicted rating')
+plt.ylim((5, 9))   # set the ylim to bottom, top
+plt.xlim(5, 9)     # set the ylim to bottom, top
+plt.show()
