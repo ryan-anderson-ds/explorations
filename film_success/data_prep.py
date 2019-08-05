@@ -20,7 +20,7 @@ dataset = pd.concat([dataset, dataset_credits], axis=1)
 dataset['budget']=dataset['budget'].replace(0,dataset['budget'].mean())
 
 X = dataset.iloc[:, :].values
-y = dataset.iloc[:, 18].values  #12 is revenue, 18 is rating - I changed this to make different y source files for next step 
+y = dataset.iloc[:, 12].values  #12 is revenue, 18 is rating - I changed this to make different y source files for next step 
 
 # picking independent variables
 X = X[:,[0,1,4,9,11,13,14,22]]
@@ -35,6 +35,17 @@ for l in range(0,len(y)):
         X_removed.append(X[l])
 y = np.array(y_removed)
 X = np.array(X_removed)
+
+# Ajusting inflation to 2019 at average inflation - 3.22%
+# do this only if using revenue (12 y index)
+avg_inflation = 1.01322
+year_now = 2019
+for l in range(0,len(y)):
+    try:
+        film_year = int(X[l,4][0:4])
+        y[l] = y[l]*(avg_inflation ** (year_now-film_year))
+    except:
+        X[l,4] = 0
 
 # converting film date to day of year
 # i am arguably losing the 'year' which might be slightly correlated with film success
