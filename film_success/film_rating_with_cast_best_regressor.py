@@ -17,17 +17,6 @@ dataset_reimported = dataset_reimported.dropna() #just two rows are lost by drop
 X = dataset_reimported.iloc[:, 1:-2].values
 y = dataset_reimported.iloc[:, -1].values
 
-# Removing zero revenues from the data
-# I did this now in data prep because I realised it later, and data prep takes a good 30 minutes. 
-y_removed = []
-X_removed = []
-for l in range(0,len(y)):
-    if y[l] !=0:
-        y_removed.append(y[l])
-        X_removed.append(X[l])
-X = np.array(X_removed)
-y = np.array(y_removed)
-
 # Splitting the dataset into the Training set and Test set
 # I have a fairly large dataset of +- 4000 entries, so I'm going with 10% test data
 from sklearn.model_selection import train_test_split

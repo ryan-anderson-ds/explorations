@@ -20,37 +20,43 @@ dataset = pd.concat([dataset, dataset_credits], axis=1)
 dataset['budget']=dataset['budget'].replace(0,dataset['budget'].mean())
 
 X = dataset.iloc[:, :].values
-y = dataset.iloc[:, 12].values  #12 is revenue, 18 is rating - I changed this to make different y source files for next step 
+y_revenue = dataset.iloc[:, 12].values
+y_rating = dataset.iloc[:, 18].values
+
 
 # picking independent variables
-X = X[:,[0,1,4,9,11,13,14,22]]
+X = X[:,[0,1,4,9,11,13,14,15,22,23]]
 
 # Removing zero REVENUES from the data - revenue is super important
 # I could (and have) adjusted for inflation, but it made scant difference to model performance
-y_removed = []
+y_revenue_removed = []
+y_rating_removed = []
 X_removed = []
-for l in range(0,len(y)):
-    if y[l] !=0:
-        y_removed.append(y[l])
+for l in range(0,len(y_revenue)):
+    if y_revenue[l] !=0:
+        y_revenue_removed.append(y_revenue[l])
+        y_rating_removed.append(y_rating[l])
         X_removed.append(X[l])
-y = np.array(y_removed)
+y_revenue = np.array(y_revenue_removed)
+y_rating = np.array(y_rating_removed)
 X = np.array(X_removed)
 
 # Ajusting inflation to 2019 at average inflation - 3.22%
 # do this only if using revenue (12 y index)
 avg_inflation = 1.01322
 year_now = 2019
-for l in range(0,len(y)):
+for l in range(0,len(y_revenue)):
     try:
         film_year = int(X[l,4][0:4])
-        y[l] = y[l]*(avg_inflation ** (year_now-film_year))
+        y_revenue[l] = y_revenue[l]*(avg_inflation ** (year_now-film_year))
+        X[l,7] = int(film_year)
     except:
         X[l,4] = 0
 
 # converting film date to day of year
 # i am arguably losing the 'year' which might be slightly correlated with film success
 # but that opens up a whole new can of worms about ratings and revenues by year
-for l in range(0,len(y)):
+for l in range(0,len(y_revenue)):
     film_date = X[l,4]
     try:
         datetime_object = datetime.strptime(film_date, '%Y-%m-%d')
@@ -78,9 +84,15 @@ dataset = encode_json_column(dataset, 3,"iso_639_1")
 
 # encoding cast
 # encoding 'just' top 500 cast
-dataset = encode_json_column(dataset, 3,"name", 500, 1)
+dataset = encode_json_column(dataset, 4,"name", 500, 1)
+
+# encoding crew
+# encoding 'just' top 500 cast
+dataset = encode_json_column(dataset, 4,"name", 500, 1)
 
 #saving to CSVs as a checkpoint to be used in regressors
 dataset.to_csv(r'Encoded_X.csv')
-dataset_y = pd.DataFrame(y)
-dataset_y.to_csv(r'Encoded_y.csv')
+dataset_y_revenue = pd.DataFrame(y_revenue)
+dataset_y_revenue.to_csv(r'Encoded_y - revenue.csv')
+dataset_y_rating = pd.DataFrame(y_rating)
+dataset_y_rating.to_csv(r'Encoded_y - rating.csv')

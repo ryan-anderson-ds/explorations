@@ -47,11 +47,18 @@ classifier = Sequential()
 #1. halve the dimensions each time
 #2. use relu for hidden layers and input layers, linear depending on your output
 
-# Input layer: sigmoid / tanh: to quickly discard inputs that dont matter (since my XGBoost said only 160 inputs count)
+"""
+Input layer: 
+-----
+sigmoid / tanh: to quickly discard inputs that dont matter (since my XGBoost said only 160 inputs count)
+I got better performance from tanh. The difference between these is supposedly about learning speed, though, so could try sigmoid again with more epochs
+
+"""
 classifier.add(Dense(units = 400, kernel_initializer = 'uniform', activation = 'tanh', input_dim = 809))
 
 """
 hidden layers: 
+-----
 - relu is most used 
 - sigmoid again was VERY bad
 https://blog.paperspace.com/vanishing-gradients-activation-function/ says elu is best of both worlds
@@ -72,10 +79,12 @@ classifier.add(Dense(units = 1, kernel_initializer = 'uniform', activation = map
 classifier.compile(optimizer = 'adam', loss = 'mean_squared_logarithmic_error')
 """ 
 Loss:
+-----
 mse is default, and generally you dont stray from it. for regression, you can also go with mean_squared_logarithmic_error for 
 ballsier guessing, or mean_absolute_error when you have many outliers
 
 Optimizer:
+-----
 Adam is the normally used ones
 I got better results from adadelta, across the board (with different loss functions, activations) - but i think that's because it made
 the model converge on an average 6.1 for all
@@ -86,5 +95,4 @@ classifier.fit(X_train, y_train, batch_size = 10, epochs = 50)
 
 # Predicting the Test set results
 y_pred = classifier.predict(X_test)
-from sklearn.metrics import r2_score
 score = r2_score(y_test, y_pred) 
