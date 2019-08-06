@@ -9,7 +9,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 dataset_X_reimported = pd.read_csv('Encoded_X.csv')
-dataset_y_reimported = pd.read_csv('Encoded_y - revenue.csv') #or - rating.csv
+dataset_y_reimported = pd.read_csv('Encoded_y - rating.csv') #or - rating.csv
 dataset_reimported = pd.concat([dataset_X_reimported,dataset_y_reimported],axis=1)
 dataset_reimported = dataset_reimported.replace([np.inf, -np.inf], np.nan)
 dataset_reimported = dataset_reimported.dropna() #just two rows are lost by dropping NaN values. Better than using mean here
