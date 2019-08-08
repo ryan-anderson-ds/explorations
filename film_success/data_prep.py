@@ -73,22 +73,22 @@ dataset = encode_json_column(dataset, 1,"name")
 # encoding keywords
 # limiting to 100 codes, and removing anything not within those 100
 # yes, it is column 1 now, since last column 1 was removed by previous encoding
-dataset = encode_json_column(dataset, 1, "name", 100, 1)
+dataset = encode_json_column(dataset, 1, "name", 500, 1) #was 100
 
 # encoding production companies.
 # limiting to 100 codes, and removing anything not within those 100
-dataset = encode_json_column(dataset, 1,"name", 100, 1)
+dataset = encode_json_column(dataset, 1,"name", 500, 1) #was 100
 
 # encoding all spoken languages
 dataset = encode_json_column(dataset, 3,"iso_639_1")
 
 # encoding cast
 # encoding 'just' top 500 cast
-dataset = encode_json_column(dataset, 4,"name", 500, 1)
+dataset = encode_json_column(dataset, 4,"name", 5000, 1) #was 500
 
 # encoding crew
 # encoding 'just' top 500 cast
-dataset = encode_json_column(dataset, 4,"name", 500, 1)
+dataset = encode_json_column(dataset, 4,"name", 5000, 1) #was 500
 
 #saving to CSVs as a checkpoint to be used in regressors
 dataset.to_csv(r'Encoded_X.csv')

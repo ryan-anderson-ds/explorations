@@ -10,12 +10,7 @@ Created on Tue Aug 4 06:46:53 2019
 import numpy as np
 import pandas as pd
 from sklearn.metrics import r2_score
-
-from keras import backend as BK
-def mapping_to_target_range( x, target_min=1, target_max=10 ) :
-    x02 = BK.tanh(x) + 1 # x in range(0,2)
-    scale = ( target_max-target_min )/2.
-    return  x02 * scale + target_min
+from keras.callbacks import ModelCheckpoint
 
 dataset_X_reimported = pd.read_csv('Encoded_X.csv')
 dataset_y_reimported = pd.read_csv('Encoded_y - rating.csv')
@@ -38,7 +33,12 @@ X_test = sc.transform(X_test)
 
 from keras.models import Sequential #required to initialise neural network
 from keras.layers import Dense #required to build the layers of the ANN
-classifier = Sequential()
+nn = Sequential()
+
+"""
+DATA: 10955 columns. 3000 rows. Essentially ALL cast, ALL crew, ALL keywords, and then the normal dataset data
+
+"""
 
 
 #TODO: FIND THAT CODE THAT GOES BACK AND PICKS THE BEST ONE AFTER MANY MANY RUNS
@@ -54,7 +54,7 @@ sigmoid / tanh: to quickly discard inputs that dont matter (since my XGBoost sai
 I got better performance from tanh. The difference between these is supposedly about learning speed, though, so could try sigmoid again with more epochs
 
 """
-classifier.add(Dense(units = 400, kernel_initializer = 'uniform', activation = 'tanh', input_dim = 809))
+nn.add(Dense(units = 5000, kernel_initializer = 'uniform', activation = 'tanh', input_dim = 10955))
 
 """
 hidden layers: 
@@ -64,24 +64,30 @@ hidden layers:
 https://blog.paperspace.com/vanishing-gradients-activation-function/ says elu is best of both worlds
 
 """
-classifier.add(Dense(units = 200, kernel_initializer = 'uniform', activation = 'elu', input_dim = 400))
-classifier.add(Dense(units = 100, kernel_initializer = 'uniform', activation = 'elu', input_dim = 200))
-classifier.add(Dense(units = 50, kernel_initializer = 'uniform', activation = 'elu', input_dim = 100))
-classifier.add(Dense(units = 25, kernel_initializer = 'uniform', activation = 'elu', input_dim = 50))
-classifier.add(Dense(units = 12, kernel_initializer = 'uniform', activation = 'elu', input_dim = 25))
-classifier.add(Dense(units = 6, kernel_initializer = 'uniform', activation = 'elu', input_dim = 12))
-classifier.add(Dense(units = 3, kernel_initializer = 'uniform', activation = 'elu', input_dim = 6))
+nn.add(Dense(units = 2500, kernel_initializer = 'uniform', activation = 'elu', input_dim = 5000))
+nn.add(Dense(units = 1200, kernel_initializer = 'uniform', activation = 'elu', input_dim = 2500))
+nn.add(Dense(units = 600, kernel_initializer = 'uniform', activation = 'elu', input_dim = 1200))
+nn.add(Dense(units = 300, kernel_initializer = 'uniform', activation = 'elu', input_dim = 600))
+nn.add(Dense(units = 150, kernel_initializer = 'uniform', activation = 'elu', input_dim = 300))
+nn.add(Dense(units = 75, kernel_initializer = 'uniform', activation = 'elu', input_dim = 150))
+nn.add(Dense(units = 40, kernel_initializer = 'uniform', activation = 'elu', input_dim = 75))
+nn.add(Dense(units = 20, kernel_initializer = 'uniform', activation = 'elu', input_dim = 40))
+nn.add(Dense(units = 10, kernel_initializer = 'uniform', activation = 'elu', input_dim = 20))
+nn.add(Dense(units = 5, kernel_initializer = 'uniform', activation = 'elu', input_dim = 10))
+nn.add(Dense(units = 3, kernel_initializer = 'uniform', activation = 'elu', input_dim = 5))
 
 # A 1-10 output layer
-classifier.add(Dense(units = 1, kernel_initializer = 'uniform', activation = mapping_to_target_range ))
+nn.add(Dense(units = 1, kernel_initializer = 'uniform', activation = 'linear' ))
 
 #for mean squared optimisation
-classifier.compile(optimizer = 'adam', loss = 'mean_squared_logarithmic_error')
+nn.compile(optimizer = 'adam', loss = 'mse', metrics=['mse', 'mean_absolute_error'])
 """ 
 Loss:
 -----
-mse is default, and generally you dont stray from it. for regression, you can also go with mean_squared_logarithmic_error for 
-ballsier guessing, or mean_absolute_error when you have many outliers
+mse is default, and generally you dont stray from it.
+ for regression, you can also go with mean_squared_logarithmic_error for 
+ballsier guessing,
+or mean_absolute_error when you have many outliers
 
 Optimizer:
 -----
@@ -91,8 +97,30 @@ the model converge on an average 6.1 for all
 
 """
 
-classifier.fit(X_train, y_train, batch_size = 10, epochs = 50)
+"""
+Defining a checkpoint of best result, and fitting
+
+"""
+checkpoint_name = 'Weights-{epoch:03d}--{val_loss:.5f}.hdf5' 
+checkpoint = ModelCheckpoint(checkpoint_name, monitor='val_loss', verbose = 1, save_best_only = True, mode ='auto')
+callbacks_list = [checkpoint]
+
+nn.fit(X_train, y_train, batch_size = 20, epochs = 500)
 
 # Predicting the Test set results
-y_pred = classifier.predict(X_test)
+y_pred = nn.predict(X_test)
 score = r2_score(y_test, y_pred) 
+
+"""
+# LOADING THE BEST MODEL
+# Load weights file of the best model :
+weights_file = 'Weights-478--18738.19831.hdf5' # choose the best checkpoint 
+nn.load_weights(weights_file) # load it
+nn.compile(loss='mse', optimizer='adam', metrics=['mse','mean_absolute_error'])
+
+#THEN TEST AGAIN
+
+y_pred = nn.predict(X_test)
+score = r2_score(y_test, y_pred) 
+"""
+
