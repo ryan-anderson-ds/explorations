@@ -79,8 +79,6 @@ Data preparation
 # Averaging out responses for each personality letter
 # unfortunately B is a twit and has 13 questions. There goes my solution elegance
 
-"""
-
 X_new = []
 
 for row in X:
@@ -129,7 +127,6 @@ for row in X:
     X_new.append(newrow)
     
 X = np.array(X_new)
-"""
 
 # split into training and test data
 
@@ -145,7 +142,7 @@ Using best classifier and pulling out feature importances. sorting them
 
 """
 
-clf = xgb.XGBClassifier(booster='gbtree')
+clf = xgb.XGBRegressor()
 
 """
  clf = xgb.XGBClassifier(base_score=0.5, booster='gbtree', colsample_bylevel=1,
