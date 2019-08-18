@@ -164,7 +164,32 @@ importances = np.array(clf.feature_importances_)
 importances = np.c_[importances, np.arange(1,17,1)]
 importances_sorted = importances[importances[:,0].argsort()]
 
+personalities = {'1' : "Warmth",
+'2' : "Reasoning",
+'3' : "Emotional stability",
+'4' : "Dominance",
+'5' : "Liveliness",
+'6' : "Rule-consciousness",
+'7' : "Social boldness",
+'8' : "Sensitivity",
+'9' : "Vigilance",
+'10' : "Abstractedness",
+'11' : "Privateness",
+'12' : "Apprehensiveness",
+'13' : "Openness to change",
+'14' : "Self-reliance",
+'15' : " Perfectionism",
+'16' : "Tension"}
+x_importances = importances_sorted[:,0]
+y_importances = []
+for importance in importances_sorted[:,1]:
+    y_importances.append(personalities[str(int(importance))])
 
 
-
+plt.rcdefaults()
+fig, ax = plt.subplots()
+ax.barh(np.flip(y_importances), np.flip(x_importances), align='center')
+ax.invert_yaxis()  # labels read top-to-bottom
+ax.set_title('Personality (PF16) attributes that best predict age')
+plt.show()
 
