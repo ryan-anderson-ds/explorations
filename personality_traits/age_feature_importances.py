@@ -1,12 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-Created on Sun Aug 18 14:34:59 2019
-
-@author: User
-"""
-
-# -*- coding: utf-8 -*-
-"""
 Created on Sat Aug 17 17:14:00 2019
 
 @author: rian-van-den-ander
@@ -16,9 +9,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import xgboost as xgb
-from sklearn.model_selection import GridSearchCV
-from sklearn.model_selection import StratifiedShuffleSplit
-from sklearn.svm import SVC
+from sklearn.model_selection import *
 
 dataset = pd.read_csv('personality_data.csv', header=0, sep='\t')
 
@@ -85,15 +76,18 @@ Data preparation
 ----------
 """
 
-# Adding interaction between personality items to X
+# Averaging out responses for each personality letter
+# unfortunately B is a twit and has 13 questions. There goes my solution elegance
+
+"""
 
 X_new = []
 
 for row in X:
-    averaged_personality_traits = []
+    newrow = []
     for trait in np.arange(0,16,1):
         if(trait==0): # B has 13 answers for some reason
-            averaged_personality_traits.append(round(np.mean([row[10*trait],
+            newrow.append(round(np.mean([row[10*trait],
                      row[10*trait + 1],
                      row[10*trait + 2],
                      row[10*trait + 3],
@@ -107,7 +101,7 @@ for row in X:
                      row[10*trait + 11],
                      row[10*trait + 12]]),2))
         elif(trait==1): # B has 13 answers for some reason
-            averaged_personality_traits.append(round(np.mean([row[16*trait],
+            newrow.append(round(np.mean([row[16*trait],
                      row[16*trait + 1],
                      row[16*trait + 2],
                      row[16*trait + 3],
@@ -121,7 +115,7 @@ for row in X:
                      row[16*trait + 11],
                      row[16*trait + 12]]),2))
         else: # so for each next trait, we must add 3 counts on to account for B's greediness
-            averaged_personality_traits.append(round(np.mean([row[10*trait + 3],
+            newrow.append(round(np.mean([row[10*trait + 3],
              row[10*trait + 1 + 3],
              row[10*trait + 2 + 3],
              row[10*trait + 3 + 3],
@@ -131,96 +125,49 @@ for row in X:
              row[10*trait + 7 + 3],
              row[10*trait + 8 + 3],
              row[10*trait + 9 + 3]]),2))
-        
-    averaged_personality_traits = np.array(averaged_personality_traits)
+    newrow = np.array(newrow)
+    X_new.append(newrow)
     
-    personality_trait_interactions = []
-    
-    outercount = 0
-    for averaged_personality_trait_outer in averaged_personality_traits:
-        innercount = 0
-        for averaged_personality_trait_inner in averaged_personality_traits:
-            if outercount != innercount:
-                if averaged_personality_trait_inner == 0:
-                    personality_trait_interactions.append(1)
-                else:
-                    personality_trait_interactions.append(round(averaged_personality_trait_outer/averaged_personality_trait_inner,2))
-            innercount+=1        
-        outercount+=1
-    
-    personality_trait_interactions = np.array(personality_trait_interactions)
-    X_new.append(personality_trait_interactions)
-
-X_new = np.array(X_new)
-X = np.append(X, X_new, axis=1)
+X = np.array(X_new)
+"""
 
 # split into training and test data
 
 from sklearn.model_selection import train_test_split
-X_train, X_test, y_gender_train, y_gender_test = train_test_split(X, y_gender, test_size = 0.1)
-
-"""
-Model
---------
-"""
+X_train, X_test, y_age_train, y_age_test = train_test_split(X, y_age, test_size = 0.1)
 
 
-"""
-# grid search - best params listed here. could still try increase learning rate, max depth, as the grid took the highest of those
 
-xgb_model = xgb.XGBClassifier()
-
-params = {
-        'min_child_weight': [25],
-        'gamma': [2.2],
-        'subsample': [0.88],
-        'colsample_bytree': [0.8],
-        'max_depth': [9],
-        'learning_rate': [0.12]
-        }
-
-clf = GridSearchCV(xgb_model, params, n_jobs=5,
-                   scoring='roc_auc',
-                   verbose=2, refit=True)
+""" 
+Feature importances
+----
+Using best classifier and pulling out feature importances. sorting them
 
 """
 
-tuned_parameters = [{'kernel': ['rbf'], 'gamma': [1e-3, 1e-4],
-                     'C': [1, 10, 50, 200]}]
+clf = xgb.XGBClassifier(booster='gbtree')
 
-grid = GridSearchCV(SVC(), tuned_parameters, cv=5,
-                       scoring='roc_auc')
-
-grid.fit(X_train, y_gender_train)
-
-
-print("The best parameters are %s with a score of %0.2f"
-      % (grid.best_params_, grid.best_score_))
-
-
+"""
+ clf = xgb.XGBClassifier(base_score=0.5, booster='gbtree', colsample_bylevel=1,
+       colsample_bynode=1, colsample_bytree=0.8, gamma=2.2,
+       learning_rate=0.12, max_delta_step=0, max_depth=9,
+       min_child_weight=25, missing=None, n_estimators=100, n_jobs=1,
+       nthread=None, objective='binary:logistic', random_state=0,
+       reg_alpha=0, reg_lambda=1, scale_pos_weight=1, seed=None,
+       silent=None, subsample=0.88, verbosity=1)
+"""
+clf.fit(X_train, y_age_train)
 
 # new y test and y_pred from best fit
 
 # When using grid search, y_pred = clf.best_estimator_.predict(X_test)
 y_pred = clf.predict(X_test)
 
-
-# Making the Confusion Matrix
-
-from sklearn.metrics import confusion_matrix
-cm = confusion_matrix(y_gender_test, y_pred)
+importances = np.array(clf.feature_importances_)
+importances = np.c_[importances, np.arange(1,17,1)]
+importances_sorted = importances[importances[:,0].argsort()]
 
 
-# Applying k-Fold Cross Validation
-
-"""
-
-from sklearn.model_selection import cross_val_score
-accuracies = cross_val_score(estimator = clf, X = X_train, y = y_gender_train, cv = 10) 
-accuracies.mean()
-accuracies.std()
-
-"""
 
 
 

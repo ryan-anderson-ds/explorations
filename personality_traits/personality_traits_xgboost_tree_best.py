@@ -1,12 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-Created on Sun Aug 18 14:34:59 2019
-
-@author: User
-"""
-
-# -*- coding: utf-8 -*-
-"""
 Created on Sat Aug 17 17:14:00 2019
 
 @author: rian-van-den-ander
@@ -83,18 +76,18 @@ Data preparation
 ----------
 """
 
+"""
+
 # Averaging out responses for each personality letter
 # unfortunately B is a twit and has 13 questions. There goes my solution elegance
-
-"""
 
 X_new = []
 
 for row in X:
-    newrow = []
+    averaged_personality_traits = []
     for trait in np.arange(0,16,1):
         if(trait==0): # B has 13 answers for some reason
-            newrow.append(round(np.mean([row[10*trait],
+            averaged_personality_traits.append(round(np.mean([row[10*trait],
                      row[10*trait + 1],
                      row[10*trait + 2],
                      row[10*trait + 3],
@@ -108,7 +101,7 @@ for row in X:
                      row[10*trait + 11],
                      row[10*trait + 12]]),2))
         elif(trait==1): # B has 13 answers for some reason
-            newrow.append(round(np.mean([row[16*trait],
+            averaged_personality_traits.append(round(np.mean([row[16*trait],
                      row[16*trait + 1],
                      row[16*trait + 2],
                      row[16*trait + 3],
@@ -122,7 +115,7 @@ for row in X:
                      row[16*trait + 11],
                      row[16*trait + 12]]),2))
         else: # so for each next trait, we must add 3 counts on to account for B's greediness
-            newrow.append(round(np.mean([row[10*trait + 3],
+            averaged_personality_traits.append(round(np.mean([row[10*trait + 3],
              row[10*trait + 1 + 3],
              row[10*trait + 2 + 3],
              row[10*trait + 3 + 3],
@@ -132,11 +125,31 @@ for row in X:
              row[10*trait + 7 + 3],
              row[10*trait + 8 + 3],
              row[10*trait + 9 + 3]]),2))
-    newrow = np.array(newrow)
-    X_new.append(newrow)
-X = np.array(X_new)
+        
+    averaged_personality_traits = np.array(averaged_personality_traits)
+    
+    personality_trait_interactions = []
+    
+    outercount = 0
+    for averaged_personality_trait_outer in averaged_personality_traits:
+        innercount = 0
+        for averaged_personality_trait_inner in averaged_personality_traits:
+            if outercount != innercount:
+                if averaged_personality_trait_inner == 0:
+                    personality_trait_interactions.append(1)
+                else:
+                    personality_trait_interactions.append(round(averaged_personality_trait_outer/averaged_personality_trait_inner,2))
+            innercount+=1        
+        outercount+=1
+    
+    personality_trait_interactions = np.array(personality_trait_interactions)
+    X_new.append(personality_trait_interactions)
+
+X_new = np.array(X_new)
+X = np.append(X, X_new, axis=1)
 
 """
+
 
 # split into training and test data
 
