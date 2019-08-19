@@ -188,6 +188,8 @@ clf = GridSearchCV(xgb_model, params, n_jobs=5,
 tuned_parameters = [{'kernel': ['rbf'], 'gamma': [1e-2, 1e-3, 1e-4],
                      'C': [1, 10, 50, 200]}]
 
+# The best parameters are {'C': 10, 'gamma': 0.001, 'kernel': 'rbf'}
+
 """
 GridSearch parameters:
     - can't specify scoring for SVC, must be hinge
@@ -206,7 +208,7 @@ print("The best parameters are %s with a score of %0.2f"
 # new y test and y_pred from best fit
 
 # When using grid search, y_pred = clf.best_estimator_.predict(X_test)
-y_pred = grid.best_predictor_.predict(X_test)
+y_pred = grid.best_estimator_.predict(X_test)
 
 
 # Making the Confusion Matrix

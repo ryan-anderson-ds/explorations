@@ -193,3 +193,19 @@ ax.invert_yaxis()  # labels read top-to-bottom
 ax.set_title('Personality (PF16) attributes that best predict age')
 plt.show()
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
