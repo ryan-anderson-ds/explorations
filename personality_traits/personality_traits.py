@@ -185,11 +185,15 @@ clf = GridSearchCV(xgb_model, params, n_jobs=5,
 
 """
 
-tuned_parameters = [{'kernel': ['rbf'], 'gamma': [1e-3, 1e-4],
+tuned_parameters = [{'kernel': ['rbf'], 'gamma': [1e-2, 1e-3, 1e-4],
                      'C': [1, 10, 50, 200]}]
 
-grid = GridSearchCV(SVC(), tuned_parameters, cv=5,
-                       scoring='roc_auc')
+"""
+GridSearch parameters:
+    - can't specify scoring for SVC, must be hinge
+    - cross validation = 3 just to have 3 shots at each, in case it's lucky
+"""
+grid = GridSearchCV(SVC(), tuned_parameters, cv=3) 
 
 grid.fit(X_train, y_gender_train)
 
@@ -202,7 +206,7 @@ print("The best parameters are %s with a score of %0.2f"
 # new y test and y_pred from best fit
 
 # When using grid search, y_pred = clf.best_estimator_.predict(X_test)
-y_pred = clf.predict(X_test)
+y_pred = grid.best_predictor_.predict(X_test)
 
 
 # Making the Confusion Matrix
