@@ -34,44 +34,6 @@ y_elapsed = dataset.iloc[:,-1].values
 
 
 """
-Exploratory Data Analysis
-----------
-"""
-
-# Distribution of age
-plt.hist(y_age)
-plt.xlabel('Age');
-plt.ylabel('Respondents');
-plt.title('Respondent age')
-plt.show()
-
-# Distribution of gender
-plt.hist(y_gender, bins=[1,2])
-bins = np.arange(1, y_gender.max() + 1.5) - 0.5
-fig, ax = plt.subplots()
-_ = ax.hist(y_gender, bins)
-ax.set_xticks(bins + 0.5)
-plt.xlabel('Gender');
-plt.ylabel('Respondents');
-plt.title('Respondent gender')
-plt.show()
-
-# Distribution of accuracy
-plt.hist(y_accuracy)
-plt.xlabel('Accuracy');
-plt.ylabel('Respondents');
-plt.title('Respondent accuracy')
-plt.show()
-
-# Distribution of time elapsed
-plt.hist(y_elapsed, bins=np.arange(0, 5000, 10))
-plt.xlabel('Elapsed');
-plt.ylabel('Respondents');
-plt.title('Respondent survey time')
-plt.show()
-
-
-"""
 Data preparation
 ----------
 """
@@ -153,6 +115,10 @@ clf = xgb.XGBRegressor()
        reg_alpha=0, reg_lambda=1, scale_pos_weight=1, seed=None,
        silent=None, subsample=0.88, verbosity=1)
 """
+
+import os
+os.environ['KMP_DUPLICATE_LIB_OK']='True' #Fix for my mac
+
 clf.fit(X_train, y_age_train)
 
 # new y test and y_pred from best fit
@@ -191,6 +157,7 @@ fig, ax = plt.subplots()
 ax.barh(np.flip(y_importances), np.flip(x_importances), align='center')
 ax.invert_yaxis()  # labels read top-to-bottom
 ax.set_title('Personality (PF16) attributes that best predict age')
+plt.xlabel('Feature importance score')
 plt.show()
 
 
