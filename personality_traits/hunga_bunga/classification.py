@@ -23,8 +23,8 @@ from sklearn.base import ClassifierMixin
 from sklearn.base import RegressorMixin
 from sklearn.base import is_classifier
 
-from core import *
-from params import *
+from hunga_bunga.core import *
+from hunga_bunga.params import *
 
 
 linear_models_n_params = [

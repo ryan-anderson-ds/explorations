@@ -1,12 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-Created on Sun Aug 18 14:34:59 2019
-
-@author: User
-"""
-
-# -*- coding: utf-8 -*-
-"""
 Created on Sat Aug 17 17:14:00 2019
 
 @author: rian-van-den-ander

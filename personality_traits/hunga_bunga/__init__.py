@@ -1,10 +1,14 @@
 
+import os.path
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+
 import warnings
 warnings.filterwarnings('ignore')
 from multiprocessing import cpu_count
 from sklearn.base import BaseEstimator
-from regression import HungaBungaRegressor
-from classification import HungaBungaClassifier
+from hunga_bunga.regression import HungaBungaRegressor
+from hunga_bunga.classification import HungaBungaClassifier
 
 
 class HungaBungaZeroKnowledge(BaseEstimator):
