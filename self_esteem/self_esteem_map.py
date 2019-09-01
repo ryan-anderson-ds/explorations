@@ -65,17 +65,32 @@ for index, row in dataset.iterrows():
 dataset['self_esteem'] = self_esteem
 
 
-# TODO: MAKE A DATAFRAME RATHER SINCE IT WILL HAVE 3 ROWS countries = dict()
+countries = dict()
 
 for index, row in dataset.iterrows():    
-    
+    current_country = row['country']
+    if current_country in countries:
+        old_num_hits = float(countries[current_country][0])
+        new_num_hits = old_num_hits+1.0
+        old_avg_self_esteem= float(countries[current_country][1])
+        
+        countries[current_country][0] += 1.0
+        countries[current_country][1] = (old_avg_self_esteem * old_num_hits / new_num_hits) + (row['self_esteem'] * 1 / new_num_hits)
+            
+    else:
+        country_data = []
+        country_data.append(1)
+        country_data.append(row['self_esteem'])
+        countries[current_country] = country_data
     #todo: average self esteem per country
     #dataframe will have a 2d array in it, with average so far, and number of entries
     
     
 
+#todo: confirm there's a significant difference between countries
+    
+#todo: cut out those countries with <50 data points (arbitrarily)
 
-
-#todo: put on map, clearly noting not enough data (<arbitrarily chosen as 50 data points)
+#todo: put on map, clearly noting not enough data 
 
 
