@@ -9,6 +9,7 @@ Created on Tue Aug 4 06:46:53 2019
 
 import numpy as np
 import pandas as pd
+import keras
 from sklearn.metrics import r2_score
 from keras.callbacks import ModelCheckpoint
 
@@ -18,8 +19,10 @@ dataset_reimported = pd.concat([dataset_X_reimported,dataset_y_reimported],axis=
 dataset_reimported = dataset_reimported.replace([np.inf, -np.inf], np.nan)
 dataset_reimported = dataset_reimported.dropna()
 
-X = dataset_reimported.iloc[:, 1:-2].values
-y = dataset_reimported.iloc[:, -1].values
+X = dataset_reimported.iloc[0:500, 1:500].values 
+#TODO: IS SET TO TEST NOW - switch to 1:-2
+
+y = dataset_reimported.iloc[0:500, -1].values
 
 # Splitting into training and test sets 
 from sklearn.model_selection import train_test_split
@@ -54,7 +57,7 @@ sigmoid / tanh: to quickly discard inputs that dont matter (since my XGBoost sai
 I got better performance from tanh. The difference between these is supposedly about learning speed, though, so could try sigmoid again with more epochs
 
 """
-nn.add(Dense(units = 5000, kernel_initializer = 'uniform', activation = 'tanh', input_dim = 10955))
+nn.add(Dense(units = 250, kernel_initializer = 'uniform', activation = 'tanh', input_dim = 499))
 
 """
 hidden layers: 
@@ -64,11 +67,13 @@ hidden layers:
 https://blog.paperspace.com/vanishing-gradients-activation-function/ says elu is best of both worlds
 
 """
+"""
 nn.add(Dense(units = 2500, kernel_initializer = 'uniform', activation = 'elu', input_dim = 5000))
 nn.add(Dense(units = 1200, kernel_initializer = 'uniform', activation = 'elu', input_dim = 2500))
 nn.add(Dense(units = 600, kernel_initializer = 'uniform', activation = 'elu', input_dim = 1200))
-nn.add(Dense(units = 300, kernel_initializer = 'uniform', activation = 'elu', input_dim = 600))
-nn.add(Dense(units = 150, kernel_initializer = 'uniform', activation = 'elu', input_dim = 300))
+nn.add(Dense(units = 250, kernel_initializer = 'uniform', activation = 'elu', input_dim = 600))
+"""
+nn.add(Dense(units = 150, kernel_initializer = 'uniform', activation = 'elu', input_dim = 250))
 nn.add(Dense(units = 75, kernel_initializer = 'uniform', activation = 'elu', input_dim = 150))
 nn.add(Dense(units = 40, kernel_initializer = 'uniform', activation = 'elu', input_dim = 75))
 nn.add(Dense(units = 20, kernel_initializer = 'uniform', activation = 'elu', input_dim = 40))
@@ -105,7 +110,11 @@ checkpoint_name = 'Weights-{epoch:03d}--{val_loss:.5f}.hdf5'
 checkpoint = ModelCheckpoint(checkpoint_name, monitor='val_loss', verbose = 1, save_best_only = True, mode ='auto')
 callbacks_list = [checkpoint]
 
-nn.fit(X_train, y_train, batch_size = 20, epochs = 500)
+nn.fit(X_train, y_train, batch_size = 5, epochs = 100) 
+""" 
+batch size = 5 was best
+#todo: put epochs back to 500
+"""
 
 # Predicting the Test set results
 y_pred = nn.predict(X_test)
