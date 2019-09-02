@@ -121,7 +121,7 @@ from sklearn.model_selection import train_test_split
 digits = load_digits()
 
 
-tpot = TPOTClassifier(generations=1, population_size=1, verbosity=2)
+tpot = TPOTClassifier(verbosity=2, n_jobs = -1)
 tpot.fit(X_train, y_gender_train)
 print(tpot.score(X_test, y_gender_test))
 tpot.export('tpot_best_pipeline.py')
