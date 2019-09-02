@@ -85,7 +85,12 @@ for index, row in dataset.iterrows():
     #todo: average self esteem per country
     #dataframe will have a 2d array in it, with average so far, and number of entries
     
-    
+dataset_countries = pd.DataFrame.from_dict(countries).T
+dataset_countries.columns = ['Respondents','Self Esteem']
+dataset_countries = dataset_countries[dataset_countries.Respondents >= 50]
+
+#min: 21.6
+#max: 29.9 - seems significant
 
 #todo: confirm there's a significant difference between countries
     
@@ -93,4 +98,13 @@ for index, row in dataset.iterrows():
 
 #todo: put on map, clearly noting not enough data 
 
+import plotly
+import plotly.express as px
+
+gapminder = px.data.gapminder().query("year==2007")
+fig = px.choropleth(gapminder, locations="iso_alpha",
+                    color="lifeExp", # lifeExp is a column of gapminder
+                    hover_name="country", # column to add to hover information
+                    color_continuous_scale=px.colors.sequential.Plasma)
+fig.show()
 
