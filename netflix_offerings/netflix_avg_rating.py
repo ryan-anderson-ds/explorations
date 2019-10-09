@@ -41,22 +41,15 @@ graphdata = graphdata.reset_index()
 
 colors = [plt.cm.rainbow(i/float(len(graphdata)-1)) for i in range(len(graphdata))]
 fig, ax = plt.subplots(figsize=(16,10), dpi= 80)    
-plt.scatter(graphdata.Year, graphdata.averageRating, s=graphdata.numOfferings*50, c=colors) #graphdata.numOfferings 5-150
+plt.scatter(graphdata.Year, graphdata.averageRating, s=graphdata.numOfferings*50, c='#e50914') #graphdata.numOfferings 5-150
 
 for i, txt in enumerate(graphdata['numOfferings']):
-    ax.annotate(txt, (graphdata['Year'][i]-50, graphdata['averageRating'][i]-50))
+    ax.annotate(txt, (graphdata['Year'][i], graphdata['averageRating'][i]),  ha='center', va='center')
 
 plt.title('Netflix: Quantity vs Quality', fontsize=22)
 plt.show()
 
 
 
-
-
-OldRange = (308 - 1)  
-NewRange = (150 - 10)  
-
-OldValue = 50
-NewValue = (((OldValue - 1) * NewRange) / OldRange) + 10
 
 
