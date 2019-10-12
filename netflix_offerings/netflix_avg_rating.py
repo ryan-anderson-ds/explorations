@@ -17,37 +17,32 @@ indexMerge = pd.merge(release_dates, imdb_indices, how='inner', left_on='Offerin
 ratingsMerge = pd.merge(indexMerge, imdb_ratings, how='inner', left_on='tconst', right_on='tconst')
 ratings = ratingsMerge[ratingsMerge.numVotes > 500] #killing duplicates on netflix or small shows. results in almost same size dataset
 
-
 #pulling out year
 ratings['Year'] = ratings['Date'].map(lambda x: datetime.datetime.strptime(x, '%B %d, %Y').year)
 
+
 #avg ratings
 meanratings = ratings.groupby('Year').mean()
+meanratings['Year'] = meanratings.index
 
-#total offerings
-totalofferings = pd.DataFrame(ratings.groupby('Year').size())
+sns.set_style("white")
 
-graphdata = pd.merge(meanratings, totalofferings, how='inner', left_index=True, right_index=True)
-
-
-graphdata = graphdata[['averageRating',0]]
-graphdata.rename(columns={0:'numOfferings'}, 
-                 inplace=True)
-graphdata = graphdata.reset_index()
-
-#notes:
-#a few duplicates so not 100% accurate
-#release date of things, so if they kept running it may raise or lower the average
-
-colors = [plt.cm.rainbow(i/float(len(graphdata)-1)) for i in range(len(graphdata))]
+# Draw Stripplot
 fig, ax = plt.subplots(figsize=(16,10), dpi= 80)    
-plt.scatter(graphdata.Year, graphdata.averageRating, s=graphdata.numOfferings*50, c='#e50914') #graphdata.numOfferings 5-150
+b = sns.stripplot(ratings["Year"], ratings["averageRating"], jitter=0.25, color="#c66c6c", size=8, ax=ax, linewidth=.5)
+b.set_facecolor('#ffd4d6')
+b.tick_params(axis='both', which='major', labelsize=15)
+b.tick_params(axis='both', which='minor', labelsize=15)
+b.set_xlabel("Year", fontsize=30,color="#e50914")
+b.set_ylabel("Rating", fontsize=30,color="#e50914")
 
-for i, txt in enumerate(graphdata['numOfferings']):
-    ax.annotate(txt, (graphdata['Year'][i], graphdata['averageRating'][i]),  ha='center', va='center')
-
+x = plt.gca().axes.get_xlim()
+             
+b.plot([0,1,2,3,4,5,6,7],meanratings['averageRating'],color='#ca9999',linewidth=5)
+          
 plt.title('Netflix: Quantity vs Quality', fontsize=22)
 plt.show()
+
 
 
 
