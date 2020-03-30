@@ -9,7 +9,6 @@ from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.linear_model import LogisticRegression
 
-
 df = pd.read_csv('../../data/aita/aita_clean.csv')
 
 X = df['body'].values
