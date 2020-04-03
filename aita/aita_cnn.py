@@ -43,17 +43,11 @@ tokenizer.fit_on_texts(X_train)
 X_train = tokenizer.texts_to_sequences(X_train)
 X_test = tokenizer.texts_to_sequences(X_test)
 vocab_size = len(tokenizer.word_index) + 1  # Adding 1 because of reserved 0 index
-print(X_train[2])
-print(X_train[2])
-
 
 #TODO: pick good value for AITA here from elbow method
 maxlen = 200
 X_train = pad_sequences(X_train, padding='post', maxlen=maxlen)
 X_test = pad_sequences(X_test, padding='post', maxlen=maxlen)
-
-#X_train = vectorizer.transform(X_train.astype('U'))
-#X_test  = vectorizer.transform(X_test.astype('U'))
 
 input_dim = X_train.shape[1] # set feature dimensions
 
@@ -64,8 +58,10 @@ embedding_matrix = create_embedding_matrix('../../data/embedding/glove.6B.50d.tx
 nonzero_elements = np.count_nonzero(np.count_nonzero(embedding_matrix, axis=1))
 embedding_accuracy = nonzero_elements / vocab_size
 print('embedding accuracy: ' + str(embedding_accuracy))
-#TODO: embedding accuracy is only 51%. how can I improve this?!
+#TODO: embedding accuracy is only 51%. That means 49% of words are not in the glove texts. how can I improve this?!
+#      is this taken into account by the trainable embedding?
 
+#TODO: fiddle with the size of these layers. maybe overnight grid search.
 model = Sequential()
 model.add(layers.Embedding(vocab_size, embedding_dim, input_length=maxlen, trainable=True))
 model.add(layers.Conv1D(128, 5, activation='relu'))
