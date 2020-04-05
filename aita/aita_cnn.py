@@ -32,34 +32,44 @@ def create_embedding_matrix(filepath, word_index, embedding_dim):
 df = pd.read_csv('../../data/aita/aita_clean.csv')
 
 X = df['body'].values
-X=X.astype(str)
+X= np.char.lower(X.astype(str))
 y = df['is_asshole'].values
 
 X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.2)
 
 #TODO: num_words constant here. how do I decide what to make it?
-tokenizer = Tokenizer(num_words=5000)
+#5000: accuracy 72.5
+
+tokenizer = Tokenizer(num_words=5000) 
 tokenizer.fit_on_texts(X_train)
 X_train = tokenizer.texts_to_sequences(X_train)
 X_test = tokenizer.texts_to_sequences(X_test)
 vocab_size = len(tokenizer.word_index) + 1  # Adding 1 because of reserved 0 index
 
-#TODO: pick good value for AITA here from elbow method
-maxlen = 200
+#500: accuracy 72.5%
+#1000: 72.8%
+#3000: 72.8%
+maxlen = 1000
 X_train = pad_sequences(X_train, padding='post', maxlen=maxlen)
 X_test = pad_sequences(X_test, padding='post', maxlen=maxlen)
 
 input_dim = X_train.shape[1] # set feature dimensions
 
-#TODO: can choose >50 dimensions with another file
-embedding_dim = 50
-embedding_matrix = create_embedding_matrix('../../data/embedding/glove.6B.50d.txt', tokenizer.word_index, embedding_dim)
+#Using glove:
+#50 dimensions: 72.8%
+#100 dimensions: 72.54
+#lower amount of dimensions not an option
+
+#TODO: using other embedding sources
+#Glove: 51% embedding accuracy, 72.54% model accuracy
+#Fasttext: 56%, 
+embedding_dim = 300
+#Glove: embedding_matrix = create_embedding_matrix('../../data/embedding/glove/glove.6B.50d.txt', tokenizer.word_index, embedding_dim)
+embedding_matrix = create_embedding_matrix('../../data/embedding/fasttext/wiki-news-300d-1M-subword.vec', tokenizer.word_index, embedding_dim)
 
 nonzero_elements = np.count_nonzero(np.count_nonzero(embedding_matrix, axis=1))
 embedding_accuracy = nonzero_elements / vocab_size
 print('embedding accuracy: ' + str(embedding_accuracy))
-#TODO: embedding accuracy is only 51%. That means 49% of words are not in the glove texts. how can I improve this?!
-#      is this taken into account by the trainable embedding?
 
 #TODO: fiddle with the size of these layers. maybe overnight grid search.
 model = Sequential()
