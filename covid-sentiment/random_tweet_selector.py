@@ -7,14 +7,13 @@ Created on Fri Sep  4 17:47:54 2020
 import random
 from os import listdir
 from os.path import isfile, join
-import file
 
 path = '../../data/covid19_one_hundred_million_unique_tweets/tweet_ids/'
 tweetfiles = [f for f in listdir(path) if isfile(join(path, f))]
 tweet_ids = []
 
 for file in tweetfiles:
-    C = 2000
+    C = 500
     fpath = file
     buffer = []
     
@@ -33,6 +32,6 @@ for file in tweetfiles:
         tweet_ids.append(item)
         
     
-all_tweets_filename = 'all_tweets.csv'
+all_tweets_filename = 'all_tweets_500_pd.csv'
 all_tweets_file = open(path+all_tweets_filename, 'w+', encoding='utf8')
 all_tweets_file.writelines(["%s\n" % item  for item in tweet_ids])
