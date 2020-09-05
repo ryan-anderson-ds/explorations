@@ -36,7 +36,7 @@ for index, row in df.iterrows():
         days_tweets = days_tweets.append(row)
     else:
         days_tweets = days_tweets.append(row)
-    tweets.append(days_tweets)        
+tweets.append(days_tweets)        
 
 
 """
@@ -64,7 +64,7 @@ for days_tweets in tweets:
     Preprocess tweets
     """
     tokenizer = Tokenizer() 
-    tokenizer.fit_on_texts(days_tweets)
+    tokenizer.fit_on_texts(days_tweets['full_text'])
     
     num_words=9000
     tokenizer.word_index = {e:i for e,i in tokenizer.word_index.items() if i <= num_words} # <= because tokenizer is 1 indexed
@@ -83,7 +83,7 @@ for days_tweets in tweets:
     y = model.predict(X_padded)
     days_emotion_percent = []           
 
-    threshold = 0.15
+    threshold = 0.05
     for i in range(0,27):
         emotion_prediction = y[:,i]
         emotion_prediction[emotion_prediction>=threshold]=1
