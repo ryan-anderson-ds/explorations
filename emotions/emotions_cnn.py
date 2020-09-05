@@ -57,7 +57,7 @@ X_train = tokenizer.texts_to_sequences(X_train)
 X_test = tokenizer.texts_to_sequences(X_test)
 vocab_size = len(tokenizer.word_index) + 1  # Adding 1 because of reserved 0 index
 
-maxlen = 20
+maxlen = 50
 X_train = pad_sequences(X_train, padding='post', maxlen=maxlen)
 X_test = pad_sequences(X_test, padding='post', maxlen=maxlen)
 
