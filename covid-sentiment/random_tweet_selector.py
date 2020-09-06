@@ -13,7 +13,7 @@ tweetfiles = [f for f in listdir(path) if isfile(join(path, f))]
 tweet_ids = []
 
 for file in tweetfiles:
-    C = 500
+    C = 1000
     fpath = file
     buffer = []
     
@@ -32,6 +32,6 @@ for file in tweetfiles:
         tweet_ids.append(item)
         
     
-all_tweets_filename = 'all_tweets_500_pd.csv'
+all_tweets_filename = 'all_tweets_2000_pd.csv'
 all_tweets_file = open(path+all_tweets_filename, 'w+', encoding='utf8')
 all_tweets_file.writelines(["%s\n" % item  for item in tweet_ids])

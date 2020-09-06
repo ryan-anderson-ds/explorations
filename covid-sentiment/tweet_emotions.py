@@ -5,7 +5,7 @@ Created on Fri Sep  4 19:33:40 2020
 """
 
 import pandas as pd
-df = pd.read_json ('../../data/covid19_one_hundred_million_unique_tweets/tweet_ids/all_tweets_500_pd.jsonl', encoding='utf8', lines=True)
+df = pd.read_json ('../../data/covid19_one_hundred_million_unique_tweets/tweet_ids/all_tweets_2000_pd.jsonl', encoding='utf8', lines=True)
 
 """
 take english tweets only
@@ -99,9 +99,24 @@ graph an emotion
 """
 
 average_emotions_df =pd.DataFrame.from_records(average_emotions)
+from scipy.ndimage.filters import gaussian_filter1d
+import matplotlib.pyplot as plt
+from matplotlib.dates import DateFormatter
+dates = pd.to_datetime(pd.Series(dates), format='%Y-%m-%d')
 
+for x in range(0,len(emotion_names)):
 
+    ysmoothed = gaussian_filter1d(average_emotions_df[x], sigma=12)
 
+    fig, ax = plt.subplots()    
+    ax.xaxis_date()
+    ax.plot(dates,ysmoothed)
+    plt.title(emotion_names[x])
+    date_form = DateFormatter("%B")
+    ax.xaxis.set_major_formatter(date_form)
+    for tick in ax.get_xticklabels():
+        tick.set_rotation(45)
+    plt.show()
 
 
 
