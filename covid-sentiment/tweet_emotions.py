@@ -98,16 +98,69 @@ for days_tweets in tweets:
 graph an emotion
 """
 
-average_emotions_df =pd.DataFrame.from_records(average_emotions)
+average_emotions_df = pd.DataFrame.from_records(average_emotions)
 from scipy.ndimage.filters import gaussian_filter1d
 import matplotlib.pyplot as plt
-from matplotlib.dates import DateFormatter
 dates = pd.to_datetime(pd.Series(dates), format='%Y-%m-%d')
+seaborn_df = pd.DataFrame(columns=["x","g"])
 
 for x in range(0,len(emotion_names)):
 
-    ysmoothed = gaussian_filter1d(average_emotions_df[x], sigma=12)
+    emotion_name = emotion_names[x]
+    
+    if(emotion_name in ['amusement','anger','annoyance','approval','caring','confusion','disappointment','disapproval','disgust','embarrassment','fear','gratitude']):
 
+        if(emotion_name == 'disgust'):            
+            ysmoothed = gaussian_filter1d(average_emotions_df[x], sigma=30)
+        else:            
+            ysmoothed = gaussian_filter1d(average_emotions_df[x], sigma=12)
+            
+        total_y = sum(ysmoothed)
+        
+        count = 0
+        for y in ysmoothed:
+            days_percent = y/total_y
+            probability = days_percent/0.0001 #lowering this smooths out the graphs
+            bucket_assignments = int(round(probability))
+            
+            if(days_percent > 0.004): #a cutoff point for the emotion
+                for assignment in range(0,bucket_assignments):
+                    seaborn_df = seaborn_df.append({"x":count,"g":emotion_name},ignore_index=True)
+            count+=1
+
+import seaborn as sns
+import numpy as np
+from matplotlib.dates import DateFormatter
+sns.set(style="white", rc={"axes.facecolor": (0, 0, 0, 0)})
+
+# Initialize the FacetGrid object
+pal = sns.cubehelix_palette(13, rot=-.25, light=.7)
+g = sns.FacetGrid(seaborn_df, row="g", hue="g", aspect=15, height=.5, palette=pal)
+
+# Draw the densities in a few steps
+g.map(sns.kdeplot, "x", clip_on=False, shade=True, alpha=1, lw=1.5, bw=.2)
+g.map(sns.kdeplot, "x", clip_on=False, color="w", lw=2, bw=.2)
+g.map(plt.axhline, y=0, lw=2, clip_on=False)
+
+# Define and use a simple function to label the plot in axes coordinates
+def label(x, color, label):
+    ax = plt.gca()
+    ax.text(0, 0, label, fontweight="bold", color=color,
+            ha="right", va="baseline", transform=ax.transAxes)
+
+g.map(label, "x")
+
+# Set the subplots to overlap
+g.fig.subplots_adjust(hspace=-.50)
+
+# Remove axes details that don't play well with overlap
+g.set_titles("")
+g.set(yticks=[])
+g.despine(bottom=True, left=True)
+
+
+
+    """  
     fig, ax = plt.subplots()    
     ax.xaxis_date()
     ax.plot(dates,ysmoothed)
@@ -117,15 +170,7 @@ for x in range(0,len(emotion_names)):
     for tick in ax.get_xticklabels():
         tick.set_rotation(45)
     plt.show()
-
-
-
-
-
-
-
-
-
+    """
 
 
 
