@@ -94,8 +94,23 @@ for days_tweets in tweets:
     average_emotions.append(days_emotion_percent)
     
 
+"""
+Covid data
+"""
+covid_df = pd.read_csv ('../../data/covid19_one_hundred_million_unique_tweets/covid-tests-cases-deaths-per-million.csv', encoding='utf8')
+covid_df['Date']= covid_df['Date'].astype('datetime64[ns]') 
+covid_df2 = covid_df[(covid_df['Date'] >= "2020-01-24") & (covid_df['Date'] <= "2020-08-29")]
+covid_df4 = covid_df2.groupby('Date', as_index=False).sum()
+
+last_val = 0
+for index, row in covid_df4.iterrows():
+    temp = row['Confirmed deaths per million (deaths per million)']
+    covid_df4.loc[index, 'Confirmed deaths per million (deaths per million)'] = row['Confirmed deaths per million (deaths per million)'] - last_val
+    last_val = temp
+covid_df4.loc[0, 'Confirmed deaths per million (deaths per million)'] = 0 #since this value will be inaccurate anyways
+
 """ 
-graph an emotion
+Prepare emotion values for graph
 """
 
 average_emotions_df = pd.DataFrame.from_records(average_emotions)
@@ -127,6 +142,26 @@ for x in range(0,len(emotion_names)):
                 for assignment in range(0,bucket_assignments):
                     seaborn_df = seaborn_df.append({"x":count,"g":emotion_name},ignore_index=True)
             count+=1
+
+"""
+Prepare covid values for graph
+"""
+
+covid_smoothed = gaussian_filter1d(covid_df4['Confirmed deaths per million (deaths per million)'], sigma=12)
+total_y = sum(covid_smoothed)
+count = 0
+for y in covid_smoothed:
+    days_percent = y/total_y
+    probability = days_percent/0.0001 #lowering this smooths out the graphs
+    bucket_assignments = int(round(probability))
+    for assignment in range(0,bucket_assignments):
+        seaborn_df = seaborn_df.append({"x":count,"g":'global covid-19 death rate'},ignore_index=True)
+    count+=1
+
+
+"""
+Graph
+"""
 
 import seaborn as sns
 import numpy as np
