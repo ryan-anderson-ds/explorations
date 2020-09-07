@@ -95,7 +95,7 @@ for days_tweets in tweets:
     
 
 """
-Covid data
+Global covid data
 """
 covid_df = pd.read_csv ('../../data/covid19_one_hundred_million_unique_tweets/covid-tests-cases-deaths-per-million.csv', encoding='utf8')
 covid_df['Date']= covid_df['Date'].astype('datetime64[ns]') 
@@ -108,6 +108,24 @@ for index, row in covid_df4.iterrows():
     covid_df4.loc[index, 'Confirmed deaths per million (deaths per million)'] = row['Confirmed deaths per million (deaths per million)'] - last_val
     last_val = temp
 covid_df4.loc[0, 'Confirmed deaths per million (deaths per million)'] = 0 #since this value will be inaccurate anyways
+
+
+"""
+US Covid data
+"""
+covid_df = pd.read_csv ('../../data/covid19_one_hundred_million_unique_tweets/covid-tests-cases-deaths-per-million.csv', encoding='utf8')
+covid_df['Date']= covid_df['Date'].astype('datetime64[ns]') 
+covid_df2 = covid_df[(covid_df['Date'] >= "2020-01-24") & (covid_df['Date'] <= "2020-08-29")]
+covid_df2 = covid_df2[(covid_df2['Entity'] == "United States")]
+covid_usa = covid_df2.groupby('Date', as_index=False).sum()
+
+last_val = 0
+for index, row in covid_usa.iterrows():
+    temp = row['Confirmed deaths per million (deaths per million)']
+    covid_usa.loc[index, 'Confirmed deaths per million (deaths per million)'] = row['Confirmed deaths per million (deaths per million)'] - last_val
+    last_val = temp
+covid_usa.loc[0, 'Confirmed deaths per million (deaths per million)'] = 0 #since this value will be inaccurate anyways
+
 
 """ 
 Prepare emotion values for graph
@@ -135,7 +153,7 @@ for x in range(0,len(emotion_names)):
         count = 0
         for y in ysmoothed:
             days_percent = y/total_y
-            probability = days_percent/0.0001 #lowering this smooths out the graphs
+            probability = days_percent/0.00001 #lowering this smooths out the graphs
             bucket_assignments = int(round(probability))
             
             if(days_percent > 0.004): #a cutoff point for the emotion
@@ -153,9 +171,24 @@ count = 0
 for y in covid_smoothed:
     days_percent = y/total_y
     probability = days_percent/0.0001 #lowering this smooths out the graphs
+    if(days_percent < 0):
+        days_percent = 0
     bucket_assignments = int(round(probability))
     for assignment in range(0,bucket_assignments):
         seaborn_df = seaborn_df.append({"x":count,"g":'global covid-19 death rate'},ignore_index=True)
+    count+=1
+
+covid_usa_smoothed = gaussian_filter1d(covid_usa['Confirmed deaths per million (deaths per million)'], sigma=12)
+total_y = sum(covid_usa_smoothed)
+count = 0
+for y in covid_usa_smoothed:
+    days_percent = y/total_y
+    probability = days_percent/0.0001 #lowering this smooths out the graphs
+    if(days_percent < 0):
+        days_percent = 0
+    bucket_assignments = int(round(probability))
+    for assignment in range(0,bucket_assignments):
+        seaborn_df = seaborn_df.append({"x":count,"g":'USA covid-19 death rate'},ignore_index=True)
     count+=1
 
 
@@ -169,7 +202,7 @@ from matplotlib.dates import DateFormatter
 sns.set(style="white", rc={"axes.facecolor": (0, 0, 0, 0)})
 
 # Initialize the FacetGrid object
-pal = sns.cubehelix_palette(13, rot=-.25, light=.7)
+pal = sns.cubehelix_palette(14, rot=-.25, light=.7)
 g = sns.FacetGrid(seaborn_df, row="g", hue="g", aspect=15, height=.5, palette=pal)
 
 # Draw the densities in a few steps
