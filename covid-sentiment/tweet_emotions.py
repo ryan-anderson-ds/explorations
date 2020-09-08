@@ -141,25 +141,23 @@ for x in range(0,len(emotion_names)):
 
     emotion_name = emotion_names[x]
     
-    if(emotion_name in ['amusement','anger','annoyance','approval','caring','confusion','disappointment','disapproval','disgust','embarrassment','fear','gratitude']):
-
-        if(emotion_name == 'disgust'):            
-            ysmoothed = gaussian_filter1d(average_emotions_df[x], sigma=30)
-        else:            
-            ysmoothed = gaussian_filter1d(average_emotions_df[x], sigma=12)
-            
-        total_y = sum(ysmoothed)
+    if(emotion_name == 'disgust'):            
+        ysmoothed = gaussian_filter1d(average_emotions_df[x], sigma=30)
+    else:            
+        ysmoothed = gaussian_filter1d(average_emotions_df[x], sigma=12)
         
-        count = 0
-        for y in ysmoothed:
-            days_percent = y/total_y
-            probability = days_percent/0.00001 #lowering this smooths out the graphs
-            bucket_assignments = int(round(probability))
-            
-            if(days_percent > 0.004): #a cutoff point for the emotion
-                for assignment in range(0,bucket_assignments):
-                    seaborn_df = seaborn_df.append({"x":count,"g":emotion_name},ignore_index=True)
-            count+=1
+    total_y = sum(ysmoothed)
+    
+    count = 0
+    for y in ysmoothed:
+        days_percent = y/total_y
+        probability = days_percent/0.001
+        bucket_assignments = int(round(probability))
+        
+        if(days_percent > 0.004): #a cutoff point for the emotion
+            for assignment in range(0,bucket_assignments):
+                seaborn_df = seaborn_df.append({"x":count,"g":emotion_name},ignore_index=True)
+        count+=1
 
 """
 Prepare covid values for graph
@@ -170,7 +168,7 @@ total_y = sum(covid_smoothed)
 count = 0
 for y in covid_smoothed:
     days_percent = y/total_y
-    probability = days_percent/0.0001 #lowering this smooths out the graphs
+    probability = days_percent/0.0001
     if(days_percent < 0):
         days_percent = 0
     bucket_assignments = int(round(probability))
@@ -183,7 +181,7 @@ total_y = sum(covid_usa_smoothed)
 count = 0
 for y in covid_usa_smoothed:
     days_percent = y/total_y
-    probability = days_percent/0.0001 #lowering this smooths out the graphs
+    probability = days_percent/0.001 #lowering this smooths out the graphs
     if(days_percent < 0):
         days_percent = 0
     bucket_assignments = int(round(probability))
@@ -196,14 +194,47 @@ for y in covid_usa_smoothed:
 Graph
 """
 
+seaborn_df_arranged_in_order = seaborn_df[seaborn_df["g"]=="amusement"].append(
+    [seaborn_df[seaborn_df["g"]=="approval"],
+    seaborn_df[seaborn_df["g"]=="disapproval"],
+    seaborn_df[seaborn_df["g"]=="confusion"],
+    seaborn_df[seaborn_df["g"]=="caring"],
+    seaborn_df[seaborn_df["g"]=="fear"],
+    seaborn_df[seaborn_df["g"]=="gratitude"],
+    seaborn_df[seaborn_df["g"]=="anger"],
+    seaborn_df[seaborn_df["g"]=="annoyance"],
+    seaborn_df[seaborn_df["g"]=="embarrassment"],
+    seaborn_df[seaborn_df["g"]=="disappointment"],
+    seaborn_df[seaborn_df["g"]=="disgust"],
+    seaborn_df[seaborn_df["g"]=="global covid-19 death rate"],
+    seaborn_df[seaborn_df["g"]=="USA covid-19 death rate"],    
+    ])
+    
+
+"""
+amusement
+approval
+disapproval
+confusion
+caring 
+fear 
+gratitude
+anger
+annoyance
+embarassment
+disappointment
+disgust
+global covid-19 death rate
+USA covid-19 death rate
+"""
+
+
 import seaborn as sns
-import numpy as np
-from matplotlib.dates import DateFormatter
 sns.set(style="white", rc={"axes.facecolor": (0, 0, 0, 0)})
 
 # Initialize the FacetGrid object
 pal = sns.cubehelix_palette(14, rot=-.25, light=.7)
-g = sns.FacetGrid(seaborn_df, row="g", hue="g", aspect=15, height=.5, palette=pal)
+g = sns.FacetGrid(seaborn_df_arranged_in_order, row="g", hue="g", aspect=15, height=.5, palette=pal)
 
 # Draw the densities in a few steps
 g.map(sns.kdeplot, "x", clip_on=False, shade=True, alpha=1, lw=1.5, bw=.2)
@@ -225,20 +256,3 @@ g.fig.subplots_adjust(hspace=-.50)
 g.set_titles("")
 g.set(yticks=[])
 g.despine(bottom=True, left=True)
-
-
-
-    """  
-    fig, ax = plt.subplots()    
-    ax.xaxis_date()
-    ax.plot(dates,ysmoothed)
-    plt.title(emotion_names[x])
-    date_form = DateFormatter("%B")
-    ax.xaxis.set_major_formatter(date_form)
-    for tick in ax.get_xticklabels():
-        tick.set_rotation(45)
-    plt.show()
-    """
-
-
-
