@@ -173,7 +173,7 @@ for y in covid_smoothed:
         days_percent = 0
     bucket_assignments = int(round(probability))
     for assignment in range(0,bucket_assignments):
-        seaborn_df = seaborn_df.append({"x":count,"g":'global covid-19 death rate'},ignore_index=True)
+        seaborn_df = seaborn_df.append({"x":count,"g":'global covid-19 deaths/population'},ignore_index=True)
     count+=1
 
 covid_usa_smoothed = gaussian_filter1d(covid_usa['Confirmed deaths per million (deaths per million)'], sigma=12)
@@ -186,7 +186,7 @@ for y in covid_usa_smoothed:
         days_percent = 0
     bucket_assignments = int(round(probability))
     for assignment in range(0,bucket_assignments):
-        seaborn_df = seaborn_df.append({"x":count,"g":'USA covid-19 death rate'},ignore_index=True)
+        seaborn_df = seaborn_df.append({"x":count,"g":'USA covid-19 deaths/population'},ignore_index=True)
     count+=1
 
 
@@ -194,10 +194,10 @@ for y in covid_usa_smoothed:
 Graph
 """
 
-seaborn_df_arranged_in_order = seaborn_df[seaborn_df["g"]=="amusement"].append(
-    [seaborn_df[seaborn_df["g"]=="approval"],
+seaborn_df_arranged_in_order = seaborn_df[seaborn_df["g"]=="confusion"].append(
+    [seaborn_df[seaborn_df["g"]=="amusement"],
+    seaborn_df[seaborn_df["g"]=="approval"],
     seaborn_df[seaborn_df["g"]=="disapproval"],
-    seaborn_df[seaborn_df["g"]=="confusion"],
     seaborn_df[seaborn_df["g"]=="caring"],
     seaborn_df[seaborn_df["g"]=="fear"],
     seaborn_df[seaborn_df["g"]=="gratitude"],
@@ -206,8 +206,8 @@ seaborn_df_arranged_in_order = seaborn_df[seaborn_df["g"]=="amusement"].append(
     seaborn_df[seaborn_df["g"]=="embarrassment"],
     seaborn_df[seaborn_df["g"]=="disappointment"],
     seaborn_df[seaborn_df["g"]=="disgust"],
-    seaborn_df[seaborn_df["g"]=="global covid-19 death rate"],
-    seaborn_df[seaborn_df["g"]=="USA covid-19 death rate"],    
+    seaborn_df[seaborn_df["g"]=="global covid-19 deaths/population"],
+    seaborn_df[seaborn_df["g"]=="USA covid-19 deaths/population"],    
     ])
     
 
