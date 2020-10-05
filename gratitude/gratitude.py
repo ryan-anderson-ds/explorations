@@ -120,10 +120,8 @@ ax.set_ylabel('')
 ax.set_xlabel('')
 
 
-
-
 """
-Area chart
+Area chart per group
 ----------------------
 """
 
@@ -187,7 +185,3 @@ plt.stackplot(x,y, labels=['Surroundings and city','People and romance','Peace',
                            'Accomplishment','Possessions and financial security','Experiences'])
 plt.legend(loc='upper left')
 plt.show()
-
-
-
-
