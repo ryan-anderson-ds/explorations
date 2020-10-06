@@ -5,7 +5,6 @@ Created on Sat Aug 17 17:14:00 2019
 @author: rian-van-den-ander
 """
 
-import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -36,6 +35,7 @@ sns.barplot(x="counts", y="themes", data=df,
             label="Total", color="b")
 ax.xaxis.tick_top()
 sns.despine(left=True, bottom=True)
+ax.margins(x=0)
 ax.set_ylabel('')    
 ax.set_xlabel('')
 
@@ -110,14 +110,16 @@ df_generalised = pd.DataFrame({'themes': themes_generalised, 'counts': list(coun
 df_generalised = df_generalised.sort_values(by='counts', ascending=False, na_position='first')
 
 sns.set(style="dark")
-f, ax = plt.subplots(figsize=(6, 5))
+f, ax = plt.subplots(figsize=(7, 5))
 sns.set_color_codes("pastel")
 sns.barplot(x="counts", y="themes", data=df_generalised,
-            label="Total", color="b")
+            label="Total")
 ax.xaxis.tick_top()
 sns.despine(left=True, bottom=True)
+ax.margins(x=0)
 ax.set_ylabel('')    
 ax.set_xlabel('')
+
 
 
 """
@@ -127,16 +129,15 @@ Area chart per group
 
 # Data
 df = dataset
-df['DATE'] =pd.to_datetime(df['DATE'])
+df['DATE'] =pd.to_datetime(df['DATE'], format='%d/%m/%Y')
 df = df.sort_values(by='DATE')
 x=df['DATE'].drop_duplicates()
 
-x=x[17:]
+x=x[:-1]
 
 df_grouped = df.groupby(['DATE']).sum()
 df = df_grouped
-df = df.iloc[17:,:]
-
+df = df.iloc[:-1,:]
 
 df['Surroundings and city'] = (df['Living in Amsterdam / Netherlands'] + df['Belonging where I live']
     + df['Beauty or tranquility of surroundings'] + df['Good weather'])
@@ -173,15 +174,32 @@ df['Accomplishment_sum'] = df['Accomplishment'].rolling(min_periods=1, window=39
 df['Possessions and financial security_sum'] = df['Possessions and financial security'].rolling(min_periods=1, window=398).sum()
 df['Experiences_sum'] = df['Experiences'].rolling(min_periods=1, window=398).sum()
 
-y = [df['Surroundings and city_sum'],df['People and romance_sum'],df['Peace_sum'],df['Feelings_sum'],
-     df['Basic needs or normality_sum'],df['Accomplishment_sum'],df['Possessions and financial security_sum'],
-     df['Experiences_sum']]
+y = [df['People and romance_sum'],
+     df['Surroundings and city_sum'],
+     df['Experiences_sum'],
+     df['Possessions and financial security_sum'],
+     df['Peace_sum'],
+     df['Feelings_sum'],     
+     df['Accomplishment_sum'],
+     df['Basic needs or normality_sum'],
+     ]
 
 sns.set(style="dark")
-f, ax = plt.subplots(figsize=(10, 6))
-sns.set_color_codes("dark")
+f, ax = plt.subplots(figsize=(11, 6))
 
-plt.stackplot(x,y, labels=['Surroundings and city','People and romance','Peace','Feelings','Basic needs or normality',
-                           'Accomplishment','Possessions and financial security','Experiences'])
+plt.stackplot(x,y, labels=['People and romance',
+                           'Surroundings and city',
+                           'Experiences',
+                           'Possessions and financial security',                           
+                           'Peace',
+                           'Feelings',
+                           'Accomplishment',
+                           'Basic needs or normality',
+                           ])
 plt.legend(loc='upper left')
+
+
+ax.get_yaxis().set_visible(False)
+ax.get_yaxis().set_ticks([])
+ax.margins(x=0)
 plt.show()
